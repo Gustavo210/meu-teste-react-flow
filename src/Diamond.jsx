@@ -1,15 +1,13 @@
-; import React, { memo } from 'react';
-import { Handle, Position, useConnection } from '@xyflow/react';
+import React, { memo } from "react";
+import { Handle, Position, useConnection } from "@xyflow/react";
 
-export default memo(({ data, isConnectable, id }) => {
+// eslint-disable-next-line react-refresh/only-export-components
+export default memo(({ data, id }) => {
   const connection = useConnection();
   const isTarget = connection.inProgress && connection.fromNode.id !== id;
   return (
     <>
-
-      <div>
-        Custom Color Picker Node: <strong>{data.color}</strong>
-      </div>
+      <div>{data.label}</div>
       <input
         className="nodrag"
         type="color"
@@ -18,13 +16,18 @@ export default memo(({ data, isConnectable, id }) => {
       />
       {!connection.inProgress && (
         <Handle
-          className='customHandleRight'
+          className="customHandleRight"
           position={Position.Right}
           type="source"
         />
       )}
       {(!connection.inProgress || isTarget) && (
-        <Handle className="customHandle" position={Position.Left} type="target" isConnectableStart={false} />
+        <Handle
+          className="customHandle"
+          position={Position.Left}
+          type="target"
+          isConnectableStart={false}
+        />
       )}
     </>
   );

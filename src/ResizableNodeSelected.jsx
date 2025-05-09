@@ -1,9 +1,16 @@
-import { memo } from 'react';
-import { Handle, Position, NodeResizer, NodeToolbar, useConnection, useReactFlow } from '@xyflow/react';
-import { useState } from 'react';
-import { MarkerType } from '@xyflow/react';
+import { memo } from "react";
+import {
+  Handle,
+  Position,
+  NodeResizer,
+  NodeToolbar,
+  useConnection,
+  useReactFlow,
+} from "@xyflow/react";
+import { useState } from "react";
+import { MarkerType } from "@xyflow/react";
 
-const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) => {
+const ResizableNodeSelected = ({ data, selected, isConnectable, id }) => {
   const connection = useConnection();
   const { getNode, addNodes, addEdges } = useReactFlow();
   const [isEditing, setIsEditing] = useState(false);
@@ -19,42 +26,37 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
         return;
       }
 
-      // Garantir que as dimensões e posições são números válidos
       const nodeWidth = currentNode.width || 150;
       const nodeHeight = currentNode.height || 50;
       const nodeX = currentNode.position?.x || 0;
       const nodeY = currentNode.position?.y || 0;
 
-      // Gerar ID único
       const newId = `node_${Date.now()}`;
 
-      // Criar novo nó do mesmo tipo (ResizableNodeSelected)
       const newNode = {
         id: newId,
-        type: 'ResizableNodeSelected', // Use o nome do tipo registrado no ReactFlow
+        type: "ResizableNodeSelected",
         position: {
-          x: nodeX + nodeWidth + 50, // Posicionar à direita com espaçamento
-          y: nodeY
+          x: nodeX + nodeWidth + 50,
+          y: nodeY,
         },
         data: {
-          label: `Novo node ${newId.slice(-4)}`
+          label: `Novo node ${newId.slice(-4)}`,
         },
         width: nodeWidth,
-        height: nodeHeight
+        height: nodeHeight,
       };
 
       console.log("Adicionando novo nó:", newNode);
 
-      // Adicionar o nó
       addNodes(newNode);
 
-      // Criar e adicionar uma edge
       const newEdge = {
         id: `edge-${id}-${newId}`,
         source: id,
         target: newId,
-        type: 'FloatingEdge',
-        markerEnd: { type: MarkerType.Arrow }
+        type: "FloatingEdge",
+        markerEnd: { type: MarkerType.ArrowClosed },
       };
 
       addEdges(newEdge);
@@ -64,13 +66,9 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
   }
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
-      <NodeToolbar
-        isVisible={selected}
-        position={Position.Bottom}
-      >
+    <div style={{ height: "100%", width: "100%" }}>
+      <NodeToolbar isVisible={selected} position={Position.Bottom}>
         <button onClick={createNewNode}>+</button>
-        <button>-</button>
       </NodeToolbar>
 
       <NodeResizer
@@ -86,14 +84,13 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
           onChange={(e) => setLabel(e.target.value)}
           onBlur={() => {
             setIsEditing(false);
-            // Atualizar o label nos dados
             if (data) data.label = label;
           }}
           style={{
-            width: '100%',
-            height: '100%',
-            boxSizing: 'border-box',
-            padding: '8px'
+            width: "100%",
+            height: "100%",
+            boxSizing: "border-box",
+            padding: "8px",
           }}
           autoFocus
         />
@@ -101,9 +98,9 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
         <div
           style={{
             padding: 10,
-            height: '100%',
-            width: '100%',
-            boxSizing: 'border-box'
+            height: "100%",
+            width: "100%",
+            boxSizing: "border-box",
           }}
           onDoubleClick={() => setIsEditing(true)}
         >
@@ -115,7 +112,7 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
         <Handle
           position={Position.Right}
           type="source"
-          style={{ background: '#555' }}
+          style={{ background: "#555" }}
           isConnectable={isConnectable}
         />
       )}
@@ -126,7 +123,7 @@ const ResizableNodeSelected = ({ data, selected, isConnectable, id, ...rest }) =
           position={Position.Left}
           type="target"
           isConnectableStart={false}
-          style={{ background: '#555' }}
+          style={{ background: "#555" }}
           isConnectable={isConnectable}
         />
       )}

@@ -1,92 +1,77 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from "react";
 import {
   Background,
   ReactFlow,
   useNodesState,
   useEdgesState,
   addEdge,
-  useReactFlow,
   Controls,
   MiniMap,
   BackgroundVariant,
-} from '@xyflow/react';
+} from "@xyflow/react";
 
-import '@xyflow/react/dist/style.css';
-import ResizableNodeSelected from './ResizableNodeSelected';
-import Triangule from './Triangule';
-import FloatingEdge from './FloatingEdge';
-import { MarkerType } from '@xyflow/react';
-import { useEffect } from 'react';
-import { ConnectionMode } from '@xyflow/react';
-import { getIncomers } from '@xyflow/react';
-import { getConnectedEdges } from '@xyflow/react';
-import { getOutgoers } from '@xyflow/react';
-import { reconnectEdge } from '@xyflow/react';
-import { useState } from 'react';
-
+import "@xyflow/react/dist/style.css";
+import ResizableNodeSelected from "./ResizableNodeSelected";
+import FloatingEdge from "./FloatingEdge";
+import { MarkerType } from "@xyflow/react";
+import { ConnectionMode } from "@xyflow/react";
+import { getIncomers } from "@xyflow/react";
+import { getConnectedEdges } from "@xyflow/react";
+import { getOutgoers } from "@xyflow/react";
+import { reconnectEdge } from "@xyflow/react";
+import { useState } from "react";
+import FloatingConnectionLine from "./FloatingConnectionLine";
+import Diamond from "./Diamond";
 
 const initialNodes = [
   {
-    id: '0',
-    type: 'Triangule',
-    data: { label: "escolhe ai" },
+    id: "0",
+    type: "Diamond",
+    data: { label: "Sou um Losangolo" },
     position: { x: 0, y: 50 },
   },
   {
-    id: '1',
-    type: 'ResizableNodeSelected',
+    id: "1",
+    type: "ResizableNodeSelected",
     data: { label: "opa deu certo" },
-    position: { x: 0, y: 150 }
-  }
+    position: { x: 0, y: 300 },
+  },
 ];
 
-let id = 2;
-const getId = () => `${id++}`;
 const nodeOrigin = [0.5, 0];
 export default function App() {
   const reactFlowWrapper = useRef(null);
   const edgeReconnectSuccessful = useRef(true);
-  const edgeDelete = useRef()
+  const edgeDelete = useRef();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [rfInstance, setRfInstance] = useState(null);
-  const { screenToFlowPosition } = useReactFlow();
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({
-      ...params,
-      type: 'FloatingEdge',
-      markerEnd: { type: MarkerType.Arrow }
-    }, eds)),
-    [],
-  );
-  const onConnectEnd = useCallback(
-    (event, connectionState) => {
-      // when a connection is dropped on the pane it's not valid
-      if (!connectionState.isValid) {
-        // we need to remove the wrapper bounds, in order to get the correct position
-        const id = getId();
-        const { clientX, clientY } =
-          'changedTouches' in event ? event.changedTouches[0] : event;
-        const newNode = {
-          id,
-          position: screenToFlowPosition({
-            x: clientX,
-            y: clientY,
-          }),
-          type: "ResizableNodeSelected",
-          data: { label: `Node ${id}` },
-          origin: [0.5, 0.0],
-        };
-
-        setNodes((nds) => nds.concat(newNode));
-        setEdges((eds) =>
-          eds.concat({ id, source: connectionState.fromNode.id, target: id }),
-        );
-      }
+  const [nodes, _, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([
+    {
+      id: "e0-1",
+      source: "0",
+      target: "1",
+      label: "This edge can only be updated from source",
+      reconnectable: "source",
+      type: "FloatingEdge",
+      markerEnd: { type: MarkerType.ArrowClosed },
     },
-    [screenToFlowPosition],
+  ]);
+  const [rfInstance, setRfInstance] = useState(null);
+  const onConnect = useCallback(
+    (params) =>
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            type: "FloatingEdge",
+            markerEnd: { type: MarkerType.ArrowClosed },
+          },
+          eds
+        )
+      ),
+    []
   );
+
   const onReconnectStart = useCallback(() => {
     edgeReconnectSuccessful.current = false;
   }, []);
@@ -104,8 +89,6 @@ export default function App() {
     edgeReconnectSuccessful.current = true;
   }, []);
 
-
-
   const onNodesDelete = useCallback(
     (deleted) => {
       setEdges(
@@ -115,7 +98,7 @@ export default function App() {
           const connectedEdges = getConnectedEdges([node], edges);
 
           const remainingEdges = acc.filter(
-            (edge) => !connectedEdges.includes(edge),
+            (edge) => !connectedEdges.includes(edge)
           );
 
           const createdEdges = incomers.flatMap(({ id: source }) =>
@@ -123,25 +106,33 @@ export default function App() {
               id: `${source}->${target}`,
               source,
               target,
-            })),
+            }))
           );
 
           return [...remainingEdges, ...createdEdges];
-        }, edges),
+        }, edges)
       );
     },
-    [nodes, edges],
+    [nodes, edges]
   );
   return (
-    <div className="simple-floatingedges" style={{
-      width: "100vw",
-      height: "100vh",
-      color: "#222"
-    }} ref={reactFlowWrapper}>
-      <button onClick={() => {
-        const flow = rfInstance.toObject();
-        console.log("flow", flow)
-      }}>TESTE</button>
+    <div
+      className="simple-floatingedges"
+      style={{
+        width: "100vw",
+        height: "100vh",
+        color: "#222",
+      }}
+      ref={reactFlowWrapper}
+    >
+      <button
+        onClick={() => {
+          const flow = rfInstance.toObject();
+          console.log("flow", flow);
+        }}
+      >
+        Imprimir estrutura
+      </button>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -153,12 +144,14 @@ export default function App() {
         onNodesDelete={onNodesDelete}
         deleteKeyCode={["Delete"]}
         onConnect={onConnect}
-        onEdgeMouseEnter={e => edgeDelete.current = e}
+        onEdgeMouseEnter={(e) => (edgeDelete.current = e)}
         fitView
+        snapToGrid
         onInit={setRfInstance}
-        nodeTypes={{ ResizableNodeSelected, Triangule }}
+        nodeTypes={{ ResizableNodeSelected, Diamond }}
         edgeTypes={{ FloatingEdge }}
         connectionMode={ConnectionMode.Loose}
+        connectionLineComponent={FloatingConnectionLine}
         fitViewOptions={{ padding: 4 }}
         nodeOrigin={nodeOrigin}
       >
@@ -168,4 +161,4 @@ export default function App() {
       </ReactFlow>
     </div>
   );
-};
+}
